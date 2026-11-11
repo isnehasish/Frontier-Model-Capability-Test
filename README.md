@@ -18,6 +18,8 @@ npm start        # serves on http://localhost:8377
 
 It needs a local server; opening `index.html` directly will not work. three.js, n8ao and postprocessing load from the jsDelivr CDN at pinned versions (see the import map in `index.html`), so there is no install or build step, but the page needs internet access. Because every local path is relative, the repo can be served as-is by any static host, including GitHub Pages.
 
+**Touch devices:** on phones and tablets an on-screen stick (walk), up/down buttons, and Next view / Tour buttons appear automatically; drag anywhere else to look. Touch devices also default to a lighter quality setting (`?q=0.75`).
+
 **Controls:** drag to look, `WASD` to walk, `Q`/`E` down/up, `Shift` to run, scroll to change the lens, `1`–`7` for viewpoints, `T` for a guided tour, `H` to hide the interface.
 
 ## Process

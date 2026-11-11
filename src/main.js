@@ -28,7 +28,9 @@ async function init() {
   renderer.shadowMap.autoUpdate = false;
   renderer.setClearColor(0x000000, 1);
   document.body.prepend(renderer.domElement);
-  const quality = parseFloat(params.get('q') || '1');
+  // phones and tablets get a lighter default (lower resolution, 4096 shadow map)
+  const coarse = window.matchMedia('(pointer: coarse)').matches;
+  const quality = parseFloat(params.get('q') || (coarse ? '0.75' : '1'));
   const maxPR = Math.min(window.devicePixelRatio || 1, 1.5) * quality;
 
   const scene = new THREE.Scene();
@@ -277,11 +279,16 @@ function makeControls(camera, dom) {
     }
     const el = document.getElementById('viewName'); if (el) { el.textContent = v.name; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show'); }
   };
-  let drag = false, lx = 0, ly = 0;
-  dom.addEventListener('pointerdown', e => { drag = true; lx = e.clientX; ly = e.clientY; dom.setPointerCapture(e.pointerId); c.tour = false; fly = null; });
-  dom.addEventListener('pointerup', () => drag = false);
+  let drag = null, lx = 0, ly = 0;
+  dom.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'touch') enableTouch();
+    if (drag !== null) return; // one finger looks; others are ignored
+    drag = e.pointerId; lx = e.clientX; ly = e.clientY; dom.setPointerCapture(e.pointerId); c.tour = false; fly = null; syncTour();
+  });
+  const endDrag = e => { if (e.pointerId === drag) drag = null; };
+  dom.addEventListener('pointerup', endDrag); dom.addEventListener('pointercancel', endDrag);
   dom.addEventListener('pointermove', e => {
-    if (!drag) return;
+    if (e.pointerId !== drag) return;
     tYaw -= (e.clientX - lx) * 0.0032; tPitch = Math.max(-1.45, Math.min(1.45, tPitch - (e.clientY - ly) * 0.0032));
     lx = e.clientX; ly = e.clientY;
   });
@@ -297,6 +304,50 @@ function makeControls(camera, dom) {
     if (e.code === 'KeyO') { const o = window.__app.pipe.opts; o.ao = !o.ao; }
   });
   window.addEventListener('keyup', e => keys[e.code] = false);
+
+  // ---- on-screen controls (touch devices): analog stick, up/down, view + tour buttons
+  c.stick = { x: 0, y: 0 }; c.vert = 0;
+  const el = id => document.getElementById(id);
+  const syncTour = () => el('bTour')?.classList.toggle('on', c.tour);
+  let touchOn = false;
+  function enableTouch() {
+    if (touchOn) return; touchOn = true;
+    document.body.classList.add('touch');
+    setTimeout(() => { const h = el('hint'); if (h) { h.style.transition = 'opacity 1.5s'; h.style.opacity = '0'; } }, 9000);
+  }
+  if (window.matchMedia('(pointer: coarse)').matches) enableTouch();
+  {
+    const stick = el('stick'), knob = el('knob'), RAD = 44;
+    let sid = null, cx = 0, cy = 0;
+    const move = e => {
+      if (e.pointerId !== sid) return;
+      let dx = e.clientX - cx, dy = e.clientY - cy; const l = Math.hypot(dx, dy);
+      if (l > RAD) { dx *= RAD / l; dy *= RAD / l; }
+      knob.style.transform = `translate(${dx}px,${dy}px)`;
+      const dead = v => Math.abs(v) < 0.12 ? 0 : v;
+      c.stick.x = dead(dx / RAD); c.stick.y = dead(dy / RAD);
+      c.tour = false; fly = null; syncTour(); e.preventDefault();
+    };
+    const end = e => { if (e.pointerId !== sid) return; sid = null; c.stick.x = c.stick.y = 0; knob.style.transform = ''; };
+    stick.addEventListener('pointerdown', e => {
+      sid = e.pointerId; stick.setPointerCapture(sid);
+      const r = stick.getBoundingClientRect(); cx = r.left + r.width / 2; cy = r.top + r.height / 2; move(e);
+    });
+    stick.addEventListener('pointermove', move);
+    stick.addEventListener('pointerup', end); stick.addEventListener('pointercancel', end);
+    const hold = (id, v) => {
+      const b = el(id);
+      b.addEventListener('pointerdown', e => { b.setPointerCapture(e.pointerId); c.vert = v; c.tour = false; fly = null; syncTour(); e.preventDefault(); });
+      const up = () => { if (c.vert === v) c.vert = 0; };
+      b.addEventListener('pointerup', up); b.addEventListener('pointercancel', up);
+    };
+    hold('bUp', 1); hold('bDown', -1);
+    el('bView').addEventListener('click', () => {
+      const V = window.__app.VIEWS; c.tour = false; c.tourI = ((c.tourI ?? 0) + 1) % V.length; c.jump(V[c.tourI], true); syncTour();
+    });
+    el('bTour').addEventListener('click', () => { c.tour = !c.tour; c.tourT = 0; syncTour(); });
+    for (const b of document.querySelectorAll('#touch button, #stick')) b.addEventListener('contextmenu', e => e.preventDefault());
+  }
   const f = new THREE.Vector3(), r = new THREE.Vector3(), acc = new THREE.Vector3();
   const ease = k => k * k * k * (k * (k * 6 - 15) + 10);
   c.update = (dt, t) => {
@@ -318,7 +369,9 @@ function makeControls(camera, dom) {
       if (keys.KeyW || keys.ArrowUp) acc.add(f); if (keys.KeyS || keys.ArrowDown) acc.sub(f);
       if (keys.KeyD || keys.ArrowRight) acc.add(r); if (keys.KeyA || keys.ArrowLeft) acc.sub(r);
       if (keys.KeyE || keys.Space) acc.y += 1; if (keys.KeyQ || keys.KeyC) acc.y -= 1;
-      if (acc.lengthSq() > 0) { acc.normalize().multiplyScalar((keys.ShiftLeft || keys.ShiftRight) ? 16 : 5.5); c.tour = false; }
+      acc.addScaledVector(f, -c.stick.y).addScaledVector(r, c.stick.x); acc.y += c.vert;
+      const mag = Math.min(1, acc.length()); // analog: a half-pushed stick walks slowly
+      if (mag > 0) { acc.normalize().multiplyScalar(((keys.ShiftLeft || keys.ShiftRight) ? 16 : 5.5) * mag); c.tour = false; }
       vel.lerp(acc, 1 - Math.exp(-dt * 6));
       pos.addScaledVector(vel, dt);
       pos.x = Math.max(-21, Math.min(21, pos.x)); pos.y = Math.max(0.5, Math.min(22, pos.y)); pos.z = Math.max(-40, Math.min(39, pos.z));

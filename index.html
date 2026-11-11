@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>The Marble Hall</title>
 <link rel="icon" href="data:,">
 <style>
@@ -30,6 +30,25 @@
   #viewName.show { animation: vn 4.5s ease forwards; }
   @keyframes vn { 0% { opacity: 0; letter-spacing: 0.3em; } 18% { opacity: 0.9; } 70% { opacity: 0.9; } 100% { opacity: 0; letter-spacing: 0.56em; } }
   @media (max-width: 700px) { #help { display: none; } }
+  /* on-screen controls for touch devices */
+  #touch { display: none; }
+  body.touch #touch { display: block; }
+  body.touch #help, body.touch #fps { display: none; }
+  body.noui #touch { display: none; }
+  #touch > * { position: fixed; z-index: 6; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+  #stick { left: calc(22px + env(safe-area-inset-left)); bottom: calc(22px + env(safe-area-inset-bottom)); width: 124px; height: 124px; border-radius: 50%;
+    border: 1px solid rgba(216,181,106,0.55); background: radial-gradient(circle, rgba(20,16,10,0.18), rgba(20,16,10,0.42)); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+  #knob { position: absolute; left: 50%; top: 50%; width: 52px; height: 52px; margin: -26px 0 0 -26px; border-radius: 50%; pointer-events: none;
+    background: radial-gradient(circle at 35% 30%, #f3dba0, #b88f45); box-shadow: 0 2px 10px rgba(0,0,0,0.45); opacity: 0.9; }
+  #tbtns { right: calc(22px + env(safe-area-inset-right)); bottom: calc(22px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 10px; }
+  #ttop { right: calc(16px + env(safe-area-inset-right)); top: calc(16px + env(safe-area-inset-top)); display: flex; gap: 8px; }
+  #touch button { font: inherit; color: var(--ink); border: 1px solid rgba(216,181,106,0.55); background: rgba(20,16,10,0.4); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+    touch-action: none; -webkit-tap-highlight-color: transparent; }
+  #tbtns button { width: 56px; height: 56px; border-radius: 50%; font-size: 20px; color: var(--gold); }
+  #ttop button { height: 40px; padding: 0 14px; border-radius: 20px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; }
+  #touch button.on, #touch button:active { background: rgba(216,181,106,0.4); }
+  #hint { left: 50%; top: calc(18px + env(safe-area-inset-top)); transform: translateX(-50%); font-size: 12px; letter-spacing: 0.12em; opacity: 0.7; white-space: nowrap; pointer-events: none; text-shadow: 0 1px 8px rgba(0,0,0,0.7); }
+  @media (max-width: 560px) { body.touch #title { display: none; } #hint { top: auto; bottom: calc(160px + env(safe-area-inset-bottom)); } }
 </style>
 <script type="importmap">
 { "imports": {
@@ -53,6 +72,12 @@
   <kbd>1</kbd>–<kbd>7</kbd> viewpoints &nbsp; <kbd>T</kbd> guided tour &nbsp; <kbd>H</kbd> hide interface
 </div>
 <div class="hud" id="fps"></div>
+<div id="touch">
+  <div id="hint">drag to look · stick to walk</div>
+  <div id="stick" aria-label="Move"><div id="knob"></div></div>
+  <div id="tbtns"><button id="bUp" aria-label="Move up">&#9650;</button><button id="bDown" aria-label="Move down">&#9660;</button></div>
+  <div id="ttop"><button id="bView">Next view</button><button id="bTour">Tour</button></div>
+</div>
 <script type="module" src="./src/main.js"></script>
 </body>
 </html>
