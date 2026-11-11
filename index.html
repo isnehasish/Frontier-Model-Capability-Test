@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Frontier Model Capability Test</title>
+<link rel="icon" href="data:,">
+<style>
+  :root { --gold: #d8b56a; --ink: #f4ecdc; --line: rgba(216,181,106,0.28); }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body { background: radial-gradient(ellipse at 50% 0%, #1d1913, #070605 70%) fixed #070605; color: var(--ink);
+    font-family: "Cormorant Garamond", "Hoefler Text", Garamond, Georgia, serif; }
+  main { max-width: 1080px; margin: 0 auto; padding: 9vh 16px 64px; }
+  header { text-align: center; margin-bottom: 7vh; }
+  h1 { font-weight: 400; font-size: clamp(18px, 3.2vw, 26px); letter-spacing: 0.34em; margin: 0 0 10px 0.34em; color: var(--gold); text-transform: uppercase; }
+  header p { margin: 0; font-style: italic; opacity: 0.65; font-size: 16px; letter-spacing: 0.05em; }
+  #grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 24px; }
+  a.card { display: block; color: inherit; text-decoration: none; border: 1px solid var(--line); border-radius: 6px; overflow: hidden;
+    background: rgba(20,16,10,0.5); transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s; }
+  a.card:hover, a.card:focus-visible { border-color: var(--gold); transform: translateY(-3px); box-shadow: 0 14px 40px rgba(0,0,0,0.5); outline: none; }
+  .thumb { aspect-ratio: 16 / 9; background: #14110c center / cover no-repeat; border-bottom: 1px solid var(--line); }
+  .body { padding: 18px 20px 20px; }
+  .body h2 { font-weight: 400; font-size: 21px; letter-spacing: 0.14em; margin: 0 0 8px; color: var(--gold); text-transform: uppercase; }
+  .body p { margin: 0 0 14px; font-size: 16px; line-height: 1.5; opacity: 0.8; }
+  .enter { font-size: 13px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); }
+  #empty { text-align: center; opacity: 0.6; font-style: italic; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Frontier Model Capability Test</h1>
+    <p>Choose a scene to enter</p>
+  </header>
+  <div id="grid"></div>
+  <p id="empty" hidden>No scenes listed yet. Add one in projects.js.</p>
+</main>
+<script src="./projects.js"></script>
+<script>
+  const list = window.PROJECTS || [];
+  const grid = document.getElementById('grid');
+  document.getElementById('empty').hidden = list.length > 0;
+  for (const p of list) {
+    const a = document.createElement('a');
+    a.className = 'card';
+    a.href = `./${p.folder}/`;
+    const t = document.createElement('div');
+    t.className = 'thumb';
+    if (p.thumb) t.style.backgroundImage = `url("./${p.folder}/${p.thumb}")`;
+    const b = document.createElement('div');
+    b.className = 'body';
+    const h = document.createElement('h2'); h.textContent = p.title;
+    const d = document.createElement('p'); d.textContent = p.blurb || '';
+    const e = document.createElement('span'); e.className = 'enter'; e.textContent = 'Enter →';
+    b.append(h, d, e);
+    a.append(t, b);
+    grid.append(a);
+  }
+</script>
+</body>
+</html>
