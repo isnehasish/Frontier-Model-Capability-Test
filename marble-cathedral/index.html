@@ -22,6 +22,8 @@
   body.noui .hud { opacity: 0 !important; animation: none !important; }
   #title { left: 28px; top: 22px; }
   #title b { display: block; font-weight: 400; letter-spacing: 0.4em; font-size: 15px; color: var(--gold); text-transform: uppercase; }
+  #back { display: block; pointer-events: auto; color: var(--ink); opacity: 0.7; text-decoration: none; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 8px; }
+  #back:hover { color: var(--gold); opacity: 1; }
   #title span { font-style: italic; font-size: 13px; opacity: 0.7; letter-spacing: 0.05em; }
   #help { left: 28px; bottom: 20px; font-size: 13px; letter-spacing: 0.08em; opacity: 0.72; line-height: 1.7; }
   #help kbd { font-family: inherit; color: var(--gold); border: 1px solid rgba(216,181,106,0.45); border-radius: 3px; padding: 0 5px; margin-right: 2px; font-size: 12px; }
@@ -65,7 +67,7 @@
   <h1>The Marble Hall</h1><p>a procedural cathedral of light</p>
   <div id="track"><div id="loadBar"></div></div><div id="loadText">Preparing…</div>
 </div></div>
-<div class="hud" id="title"><b>The Marble Hall</b><span>real-time · fully procedural</span></div>
+<div class="hud" id="title"><a id="back" href="../">&larr; All scenes</a><b>The Marble Hall</b><span>real-time · fully procedural</span></div>
 <div class="hud" id="viewName"></div>
 <div class="hud" id="help">
   <kbd>drag</kbd> look &nbsp; <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> walk &nbsp; <kbd>Q</kbd><kbd>E</kbd> down / up &nbsp; <kbd>shift</kbd> run &nbsp; <kbd>scroll</kbd> lens<br>
