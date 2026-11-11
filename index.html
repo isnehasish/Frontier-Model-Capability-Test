@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Marble Hall</title>
+<link rel="icon" href="data:,">
+<style>
+  :root { --gold: #d8b56a; --ink: #f4ecdc; }
+  html, body { margin: 0; height: 100%; background: #0b0a09; overflow: hidden; font-family: "Cormorant Garamond", "Hoefler Text", Garamond, Georgia, serif; color: var(--ink); }
+  canvas { display: block; width: 100vw; height: 100vh; touch-action: none; cursor: grab; }
+  canvas:active { cursor: grabbing; }
+  #loader { position: fixed; inset: 0; display: grid; place-items: center; background: radial-gradient(ellipse at 50% 40%, #1d1913, #070605 70%); z-index: 10; transition: opacity 1.6s ease 0.2s; }
+  #loader.done { opacity: 0; pointer-events: none; }
+  #loader .box { text-align: center; width: min(420px, 80vw); }
+  #loader h1 { font-weight: 400; letter-spacing: 0.42em; font-size: 22px; margin: 0 0 6px 0.42em; color: var(--gold); text-transform: uppercase; }
+  #loader p { margin: 0 0 26px; font-style: italic; opacity: 0.6; font-size: 15px; letter-spacing: 0.06em; }
+  #track { height: 1px; background: rgba(216,181,106,0.2); }
+  #loadBar { height: 1px; width: 0; background: var(--gold); box-shadow: 0 0 12px var(--gold); transition: width 0.4s ease; }
+  #loadText { margin-top: 14px; font-size: 13px; letter-spacing: 0.14em; opacity: 0.55; text-transform: uppercase; }
+  .hud { position: fixed; z-index: 5; pointer-events: none; text-shadow: 0 1px 10px rgba(0,0,0,0.65); transition: opacity 0.5s; }
+  body.noui .hud { opacity: 0 !important; animation: none !important; }
+  #title { left: 28px; top: 22px; }
+  #title b { display: block; font-weight: 400; letter-spacing: 0.4em; font-size: 15px; color: var(--gold); text-transform: uppercase; }
+  #title span { font-style: italic; font-size: 13px; opacity: 0.7; letter-spacing: 0.05em; }
+  #help { left: 28px; bottom: 20px; font-size: 13px; letter-spacing: 0.08em; opacity: 0.72; line-height: 1.7; }
+  #help kbd { font-family: inherit; color: var(--gold); border: 1px solid rgba(216,181,106,0.45); border-radius: 3px; padding: 0 5px; margin-right: 2px; font-size: 12px; }
+  #fps { right: 24px; bottom: 20px; font-size: 12px; letter-spacing: 0.14em; opacity: 0.45; }
+  #viewName { left: 50%; bottom: 9vh; transform: translateX(-50%); font-size: 20px; letter-spacing: 0.5em; text-transform: uppercase; color: var(--ink); opacity: 0; white-space: nowrap; }
+  #viewName.show { animation: vn 4.5s ease forwards; }
+  @keyframes vn { 0% { opacity: 0; letter-spacing: 0.3em; } 18% { opacity: 0.9; } 70% { opacity: 0.9; } 100% { opacity: 0; letter-spacing: 0.56em; } }
+  @media (max-width: 700px) { #help { display: none; } }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "./node_modules/three/build/three.module.js",
+  "three/addons/": "./node_modules/three/examples/jsm/",
+  "three/examples/jsm/": "./node_modules/three/examples/jsm/",
+  "postprocessing": "./node_modules/postprocessing/build/index.js",
+  "n8ao": "./node_modules/n8ao/dist/N8AO.js"
+} }
+</script>
+</head>
+<body>
+<div id="loader"><div class="box">
+  <h1>The Marble Hall</h1><p>a procedural cathedral of light</p>
+  <div id="track"><div id="loadBar"></div></div><div id="loadText">Preparing…</div>
+</div></div>
+<div class="hud" id="title"><b>The Marble Hall</b><span>real-time · fully procedural</span></div>
+<div class="hud" id="viewName"></div>
+<div class="hud" id="help">
+  <kbd>drag</kbd> look &nbsp; <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> walk &nbsp; <kbd>Q</kbd><kbd>E</kbd> down / up &nbsp; <kbd>shift</kbd> run &nbsp; <kbd>scroll</kbd> lens<br>
+  <kbd>1</kbd>–<kbd>7</kbd> viewpoints &nbsp; <kbd>T</kbd> guided tour &nbsp; <kbd>H</kbd> hide interface
+</div>
+<div class="hud" id="fps"></div>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
